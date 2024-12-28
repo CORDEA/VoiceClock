@@ -2,7 +2,8 @@ package jp.cordea.voiceclock.ui.home
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -17,7 +18,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import jp.cordea.voiceclock.ui.clock.Clock
 import jp.cordea.voiceclock.ui.settings.Settings
+import jp.cordea.voiceclock.ui.timer.Timer
 
 @Composable
 fun Home() {
@@ -47,17 +50,19 @@ fun Home() {
     ) {
         NavHost(
             navHostController,
-            startDestination = Route.Home.route,
+            startDestination = Route.Clock.route,
             modifier = Modifier.padding(it)
         ) {
-            composable(Route.Home.route) { Settings("home") }
-            composable(Route.Settings.route) { Settings("settings") }
+            composable(Route.Clock.route) { Clock() }
+            composable(Route.Timer.route) { Timer() }
+            composable(Route.Settings.route) { Settings() }
         }
     }
 }
 
 private enum class Route {
-    Home,
+    Clock,
+    Timer,
     Settings;
 
     val route: String
@@ -65,7 +70,8 @@ private enum class Route {
 
     val icon: ImageVector
         get() = when (this) {
-            Home -> Icons.Default.Home
+            Clock -> Icons.Default.Schedule
+            Timer -> Icons.Default.Alarm
             Settings -> Icons.Default.Settings
         }
 
