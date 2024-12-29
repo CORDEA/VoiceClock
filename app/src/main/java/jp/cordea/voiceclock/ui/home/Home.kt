@@ -80,7 +80,7 @@ fun Home(viewModel: HomeViewModel) {
             modifier = Modifier.padding(it)
         ) {
             composable(Route.Clock.route) { Clock(hiltViewModel()) }
-            composable(Route.Timer.route) { Timer() }
+            composable(Route.Timer.route) { Timer(hiltViewModel()) }
             composable(Route.Settings.route) { Settings() }
         }
     }

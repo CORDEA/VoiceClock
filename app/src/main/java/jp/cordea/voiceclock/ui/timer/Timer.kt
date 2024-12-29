@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Timer() {
+fun Timer(viewModel: TimerViewModel) {
     Scaffold(
         floatingActionButton = {
             LargeFloatingActionButton(onClick = {}) {
