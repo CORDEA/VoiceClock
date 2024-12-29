@@ -1,17 +1,23 @@
 package jp.cordea.voiceclock.ui.home
 
+import android.content.Intent
+import android.speech.tts.TextToSpeech
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,20 +31,38 @@ import jp.cordea.voiceclock.ui.settings.Settings
 import jp.cordea.voiceclock.ui.timer.Timer
 
 @Composable
-fun Home() {
-    val navHostController = rememberNavController()
+@OptIn(ExperimentalMaterial3Api::class)
+fun Home(viewModel: HomeViewModel) {
+    val navController = rememberNavController()
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+            viewModel.onTtsReceived()
+        }
+    }
+    LaunchedEffect(Unit) {
+        launcher.launch(
+            Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA)
+        )
+    }
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Voice Clock") }
+            )
+        },
         bottomBar = {
             NavigationBar {
-                val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 Route.entries.forEach {
                     NavigationBarItem(
                         icon = { Icon(it.icon, contentDescription = null) },
                         label = { Text(it.label) },
                         selected = currentBackStackEntry?.destination?.route == it.route,
                         onClick = {
-                            navHostController.navigate(it.route) {
-                                popUpTo(navHostController.graph.startDestinationId) {
+                            navController.navigate(it.route) {
+                                popUpTo(navController.graph.startDestinationId) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
@@ -51,7 +75,7 @@ fun Home() {
         }
     ) {
         NavHost(
-            navHostController,
+            navController,
             startDestination = Route.Clock.route,
             modifier = Modifier.padding(it)
         ) {

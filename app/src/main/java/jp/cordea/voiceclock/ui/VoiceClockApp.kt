@@ -1,6 +1,7 @@
 package jp.cordea.voiceclock.ui
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -15,6 +16,6 @@ fun VoiceClockApp() {
 @Composable
 private fun AppNavHost(navHostController: NavHostController) {
     NavHost(navHostController, startDestination = "home") {
-        composable("home") { Home() }
+        composable("home") { Home(hiltViewModel()) }
     }
 }
