@@ -15,7 +15,7 @@ class TtsService @Inject constructor(
     private val _state = MutableSharedFlow<TtsState>(replay = 1)
     val state = _state.asSharedFlow()
 
-    lateinit var tts: TextToSpeech
+    private lateinit var tts: TextToSpeech
 
     override fun onInit(result: Int) {
         if (result == TextToSpeech.SUCCESS) {
@@ -23,6 +23,10 @@ class TtsService @Inject constructor(
         } else {
             _state.tryEmit(TtsState.ERROR)
         }
+    }
+
+    fun speak(text: String) {
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
     fun start() {

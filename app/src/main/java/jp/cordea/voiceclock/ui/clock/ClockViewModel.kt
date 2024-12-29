@@ -1,10 +1,12 @@
 package jp.cordea.voiceclock.ui.clock
 
 import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.voiceclock.GetTtsStateUseCase
+import jp.cordea.voiceclock.ReadTextUseCase
 import jp.cordea.voiceclock.TtsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ClockViewModel @Inject constructor(
-    getTtsStateUseCase: GetTtsStateUseCase
+    getTtsStateUseCase: GetTtsStateUseCase,
+    readTextUseCase: ReadTextUseCase
 ) : ViewModel() {
     companion object {
         private val FORMAT = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
@@ -29,12 +32,25 @@ class ClockViewModel @Inject constructor(
     private val isUnitExpanded = MutableStateFlow(false)
     private val value = MutableStateFlow(1)
     private val unit = MutableStateFlow(ClockUnit.MINUTE)
+    private val isStarted = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
             while (true) {
                 delay(1000L)
-                time.value = FORMAT.format(Date())
+                val calendar = Calendar.getInstance()
+                val now = FORMAT.format(calendar.time)
+                time.value = now
+                if (isStarted.value) {
+                    val field = when (unit.value) {
+                        ClockUnit.HOUR -> Calendar.HOUR_OF_DAY
+                        ClockUnit.MINUTE -> Calendar.MINUTE
+                        ClockUnit.SECOND -> Calendar.SECOND
+                    }
+                    if (calendar.get(field) == value.value) {
+                        readTextUseCase.execute(now)
+                    }
+                }
             }
         }
     }
@@ -43,18 +59,24 @@ class ClockViewModel @Inject constructor(
         combine(
             time,
             showController,
-            isValueExpanded,
-            isUnitExpanded,
+            combine(
+                isValueExpanded,
+                isUnitExpanded
+            ) { isValueExpanded, isUnitExpanded ->
+                isValueExpanded to isUnitExpanded
+            },
+            isStarted,
             getTtsStateUseCase.execute()
-        ) { time, showController, isValueExpanded, isUnitExpanded, state ->
+        ) { time, showController, expanded, isStarted, state ->
             ClockUiState(
                 time,
                 state,
                 showController,
-                isValueExpanded,
-                isUnitExpanded,
+                expanded.first,
+                expanded.second,
                 unit.value,
-                value.value
+                value.value,
+                isStarted
             )
         }.stateIn(
             viewModelScope,
@@ -66,7 +88,8 @@ class ClockViewModel @Inject constructor(
                 isValueExpanded = false,
                 isUnitExpanded = false,
                 ClockUnit.MINUTE,
-                1
+                1,
+                isStarted = false
             )
         )
 
@@ -76,6 +99,7 @@ class ClockViewModel @Inject constructor(
 
     fun onPlayClicked() {
         showController.value = false
+        isStarted.value = true
     }
 
     fun onValueExpandChanged(it: Boolean) {

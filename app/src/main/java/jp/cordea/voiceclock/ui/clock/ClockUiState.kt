@@ -9,7 +9,8 @@ data class ClockUiState(
     val isValueExpanded: Boolean,
     val isUnitExpanded: Boolean,
     val unit: ClockUnit,
-    val value: Int
+    val value: Int,
+    val isStarted: Boolean
 )
 
 enum class ClockUnit {
