@@ -4,22 +4,31 @@ import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jp.cordea.voiceclock.GetTtsStateUseCase
+import jp.cordea.voiceclock.TtsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
-class ClockViewModel @Inject constructor() : ViewModel() {
+class ClockViewModel @Inject constructor(
+    getTtsStateUseCase: GetTtsStateUseCase
+) : ViewModel() {
     companion object {
         private val FORMAT = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
     }
 
     private val time = MutableStateFlow(FORMAT.format(Date()))
+    private val showController = MutableStateFlow(false)
+    private val isValueExpanded = MutableStateFlow(false)
+    private val isUnitExpanded = MutableStateFlow(false)
+    private val value = MutableStateFlow(1)
+    private val unit = MutableStateFlow(ClockUnit.MINUTE)
 
     init {
         viewModelScope.launch {
@@ -30,6 +39,62 @@ class ClockViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    val uiState = time.map { ClockUiState(it) }
-        .stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(), ClockUiState(""))
+    val uiState =
+        combine(
+            time,
+            showController,
+            isValueExpanded,
+            isUnitExpanded,
+            getTtsStateUseCase.execute()
+        ) { time, showController, isValueExpanded, isUnitExpanded, state ->
+            ClockUiState(
+                time,
+                state,
+                showController,
+                isValueExpanded,
+                isUnitExpanded,
+                unit.value,
+                value.value
+            )
+        }.stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            ClockUiState(
+                "",
+                TtsState.LOADING,
+                showController = false,
+                isValueExpanded = false,
+                isUnitExpanded = false,
+                ClockUnit.MINUTE,
+                1
+            )
+        )
+
+    fun onFabClicked() {
+        showController.value = true
+    }
+
+    fun onPlayClicked() {
+        showController.value = false
+    }
+
+    fun onValueExpandChanged(it: Boolean) {
+        isValueExpanded.value = it
+    }
+
+    fun onValueChanged(it: Int) {
+        value.value = it
+    }
+
+    fun onUnitExpandChanged(it: Boolean) {
+        isUnitExpanded.value = it
+    }
+
+    fun onUnitChanged(it: ClockUnit) {
+        unit.value = it
+    }
+
+    fun onDismissController() {
+        showController.value = false
+    }
 }
