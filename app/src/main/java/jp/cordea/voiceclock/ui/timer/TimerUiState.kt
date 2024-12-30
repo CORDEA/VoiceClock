@@ -9,7 +9,19 @@ data class TimerUiState(
     val showController: Boolean,
     val isValueExpanded: Boolean,
     val isUnitExpanded: Boolean,
+    val isHoursExpanded: Boolean,
+    val isMinutesExpanded: Boolean,
+    val isSecondsExpanded: Boolean,
+    val hours: Int,
+    val minutes: Int,
+    val seconds: Int,
     val unit: ClockUnit,
     val value: Int,
-    val isStarted: Boolean
+    val state: TimerState
 )
+
+enum class TimerState {
+    STARTED,
+    PAUSED,
+    STOPPED
+}

@@ -3,6 +3,7 @@ package jp.cordea.voiceclock.ui.timer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -69,8 +70,14 @@ fun Timer(viewModel: TimerViewModel) {
             Controller(
                 isValueExpanded = state.isValueExpanded,
                 isUnitExpanded = state.isUnitExpanded,
+                isHoursExpanded = state.isHoursExpanded,
+                isMinutesExpanded = state.isMinutesExpanded,
+                isSecondsExpanded = state.isSecondsExpanded,
                 value = state.value,
                 unit = state.unit,
+                hours = state.hours,
+                minutes = state.minutes,
+                seconds = state.seconds,
                 onDismiss = {
                     viewModel.onDismissController()
                 },
@@ -85,6 +92,24 @@ fun Timer(viewModel: TimerViewModel) {
                 },
                 onUnitChanged = {
                     viewModel.onUnitChanged(it)
+                },
+                onHoursChanged = {
+                    viewModel.onHoursChanged(it)
+                },
+                onHoursExpandChanged = {
+                    viewModel.onHoursExpandChanged(it)
+                },
+                onMinutesChanged = {
+                    viewModel.onMinutesChanged(it)
+                },
+                onMinutesExpandChanged = {
+                    viewModel.onMinutesExpandChanged(it)
+                },
+                onSecondsChanged = {
+                    viewModel.onSecondsChanged(it)
+                },
+                onSecondsExpandChanged = {
+                    viewModel.onSecondsExpandChanged(it)
                 },
                 onClicked = {
                     viewModel.onPlayClicked()
@@ -136,13 +161,25 @@ private fun Progress() {
 private fun Controller(
     isValueExpanded: Boolean,
     isUnitExpanded: Boolean,
+    isHoursExpanded: Boolean,
+    isMinutesExpanded: Boolean,
+    isSecondsExpanded: Boolean,
     value: Int,
     unit: ClockUnit,
+    hours: Int,
+    minutes: Int,
+    seconds: Int,
     onDismiss: () -> Unit,
     onValueExpandChanged: (Boolean) -> Unit,
     onValueChanged: (Int) -> Unit,
     onUnitExpandChanged: (Boolean) -> Unit,
     onUnitChanged: (ClockUnit) -> Unit,
+    onHoursChanged: (Int) -> Unit,
+    onHoursExpandChanged: (Boolean) -> Unit,
+    onMinutesChanged: (Int) -> Unit,
+    onMinutesExpandChanged: (Boolean) -> Unit,
+    onSecondsChanged: (Int) -> Unit,
+    onSecondsExpandChanged: (Boolean) -> Unit,
     onClicked: () -> Unit
 ) {
     ModalBottomSheet(
@@ -154,87 +191,121 @@ private fun Controller(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Dropdown(
+                    value = hours.toString(),
+                    expanded = isHoursExpanded,
+                    onExpandedChange = onHoursExpandChanged,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    (0..23).forEach {
+                        DropdownMenuItem(
+                            onClick = {
+                                onHoursChanged(it)
+                            },
+                            text = {
+                                Text(it.toString())
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(":")
+                Spacer(modifier = Modifier.width(4.dp))
+                Dropdown(
+                    value = minutes.toString(),
+                    expanded = isMinutesExpanded,
+                    onExpandedChange = onMinutesExpandChanged,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    (0..59).forEach {
+                        DropdownMenuItem(
+                            onClick = {
+                                onMinutesChanged(it)
+                            },
+                            text = {
+                                Text(it.toString())
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(":")
+                Spacer(modifier = Modifier.width(4.dp))
+                Dropdown(
+                    value = seconds.toString(),
+                    expanded = isSecondsExpanded,
+                    onExpandedChange = onSecondsExpandChanged,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    (0..59).forEach {
+                        DropdownMenuItem(
+                            onClick = {
+                                onSecondsChanged(it)
+                            },
+                            text = {
+                                Text(it.toString())
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text("Every")
                 Spacer(modifier = Modifier.width(16.dp))
-                ExposedDropdownMenuBox(
-                    modifier = Modifier.weight(1f),
+                Dropdown(
+                    value = value.toString(),
                     expanded = isValueExpanded,
-                    onExpandedChange = onValueExpandChanged
+                    onExpandedChange = onValueExpandChanged,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    TextField(
-                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
-                        value = value.toString(),
-                        onValueChange = {},
-                        singleLine = true,
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                expanded = isValueExpanded,
-                                modifier = Modifier.menuAnchor(MenuAnchorType.SecondaryEditable)
-                            )
-                        }
-                    )
-                    DropdownMenu(expanded = isValueExpanded, onDismissRequest = {
-                        onValueExpandChanged(false)
-                    }) {
-                        val range = when (unit) {
-                            ClockUnit.HOUR -> (0..23)
-                            ClockUnit.MINUTE -> (0..59)
-                            ClockUnit.SECOND -> (0..59)
-                        }
-                        range.forEach {
-                            DropdownMenuItem(
-                                onClick = {
-                                    onValueChanged(it)
-                                },
-                                text = {
-                                    Text(it.toString())
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
+                    val range = when (unit) {
+                        ClockUnit.HOUR -> (0..23)
+                        ClockUnit.MINUTE -> (0..59)
+                        ClockUnit.SECOND -> (0..59)
+                    }
+                    range.forEach {
+                        DropdownMenuItem(
+                            onClick = {
+                                onValueChanged(it)
+                            },
+                            text = {
+                                Text(it.toString())
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                ExposedDropdownMenuBox(
-                    modifier = Modifier.weight(1f),
+                Dropdown(
+                    value = when (unit) {
+                        ClockUnit.HOUR -> "hour"
+                        ClockUnit.MINUTE -> "minute"
+                        ClockUnit.SECOND -> "second"
+                    },
                     expanded = isUnitExpanded,
-                    onExpandedChange = onUnitExpandChanged
+                    onExpandedChange = onUnitExpandChanged,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    TextField(
-                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
-                        value = when (unit) {
-                            ClockUnit.HOUR -> "hour"
-                            ClockUnit.MINUTE -> "minute"
-                            ClockUnit.SECOND -> "second"
-                        },
-                        onValueChange = {},
-                        singleLine = true,
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                expanded = isUnitExpanded,
-                                modifier = Modifier.menuAnchor(MenuAnchorType.SecondaryEditable)
-                            )
-                        }
-                    )
-                    DropdownMenu(expanded = isUnitExpanded, onDismissRequest = {
-                        onUnitExpandChanged(false)
-                    }) {
-                        ClockUnit.entries.forEach {
-                            DropdownMenuItem(
-                                onClick = {
-                                    onUnitChanged(it)
-                                },
-                                text = {
-                                    when (it) {
-                                        ClockUnit.HOUR -> Text("hour")
-                                        ClockUnit.MINUTE -> Text("minute")
-                                        ClockUnit.SECOND -> Text("second")
-                                    }
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-
+                    ClockUnit.entries.forEach {
+                        DropdownMenuItem(
+                            onClick = {
+                                onUnitChanged(it)
+                            },
+                            text = {
+                                when (it) {
+                                    ClockUnit.HOUR -> Text("hour")
+                                    ClockUnit.MINUTE -> Text("minute")
+                                    ClockUnit.SECOND -> Text("second")
+                                }
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
                     }
                 }
             }
@@ -246,5 +317,37 @@ private fun Controller(
                 Text("Play")
             }
         }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun Dropdown(
+    value: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = modifier
+    ) {
+        TextField(
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
+            value = value,
+            onValueChange = {},
+            singleLine = true,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded,
+                    modifier = Modifier.menuAnchor(MenuAnchorType.SecondaryEditable)
+                )
+            }
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = {
+            onExpandedChange(false)
+        }, content = content)
     }
 }
