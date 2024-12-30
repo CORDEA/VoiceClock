@@ -9,13 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,7 +29,6 @@ import jp.cordea.voiceclock.ui.settings.Settings
 import jp.cordea.voiceclock.ui.timer.Timer
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun Home(viewModel: HomeViewModel) {
     val navController = rememberNavController()
     val launcher = rememberLauncherForActivityResult(
@@ -47,11 +44,6 @@ fun Home(viewModel: HomeViewModel) {
         )
     }
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Voice Clock") }
-            )
-        },
         bottomBar = {
             NavigationBar {
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
