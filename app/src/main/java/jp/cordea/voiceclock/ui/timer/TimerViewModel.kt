@@ -126,14 +126,17 @@ class TimerViewModel @Inject constructor(
 
     fun onHoursChanged(it: Int) {
         hours.value = it
+        isHoursExpanded.value = false
     }
 
     fun onMinutesChanged(it: Int) {
         minutes.value = it
+        isMinutesExpanded.value = false
     }
 
     fun onSecondsChanged(it: Int) {
         seconds.value = it
+        isSecondsExpanded.value = false
     }
 
     fun onValueExpandChanged(it: Boolean) {
@@ -142,6 +145,7 @@ class TimerViewModel @Inject constructor(
 
     fun onValueChanged(it: Int) {
         value.value = it
+        isValueExpanded.value = false
     }
 
     fun onUnitExpandChanged(it: Boolean) {
@@ -150,6 +154,7 @@ class TimerViewModel @Inject constructor(
 
     fun onUnitChanged(it: ClockUnit) {
         unit.value = it
+        isUnitExpanded.value = false
     }
 
     fun onDismissController() {

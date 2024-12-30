@@ -108,6 +108,7 @@ class ClockViewModel @Inject constructor(
 
     fun onValueChanged(it: Int) {
         value.value = it
+        isValueExpanded.value = false
     }
 
     fun onUnitExpandChanged(it: Boolean) {
@@ -116,6 +117,7 @@ class ClockViewModel @Inject constructor(
 
     fun onUnitChanged(it: ClockUnit) {
         unit.value = it
+        isUnitExpanded.value = false
     }
 
     fun onDismissController() {
