@@ -1,5 +1,6 @@
 package jp.cordea.voiceclock.ui.clock
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -89,7 +90,7 @@ fun Clock(viewModel: ClockViewModel) {
                 }
             )
         }
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
@@ -116,12 +118,23 @@ fun Timer(viewModel: TimerViewModel) {
                 }
             )
         }
-        Column(
-            modifier = Modifier.padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(innerPadding)
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
             Progress(
+                modifier = Modifier
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints)
+                        layout(placeable.width, placeable.height) {
+                            placeable.place(
+                                constraints.maxWidth / 2 - placeable.width / 2,
+                                constraints.maxHeight / 7
+                            )
+                        }
+                    },
                 remaining = state.remaining,
                 sweepAngle = state.sweepAngle
             )
@@ -131,15 +144,14 @@ fun Timer(viewModel: TimerViewModel) {
 
 @Composable
 private fun Progress(
+    modifier: Modifier,
     remaining: Long,
     sweepAngle: Float
 ) {
     val color = MaterialTheme.colorScheme.primary
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp)
+        modifier = modifier
     ) {
         Canvas(
             modifier = Modifier
