@@ -108,7 +108,8 @@ fun Clock(viewModel: ClockViewModel) {
                         }
                     },
                 fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
-                fontSize = MaterialTheme.typography.headlineLarge.fontSize
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

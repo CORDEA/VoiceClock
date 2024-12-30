@@ -161,7 +161,8 @@ private fun Progress(
                 remaining % 60
             ),
             style = MaterialTheme.typography.headlineLarge,
-            fontSize = MaterialTheme.typography.headlineLarge.fontSize
+            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

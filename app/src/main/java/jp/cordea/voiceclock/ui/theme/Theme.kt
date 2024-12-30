@@ -1,6 +1,5 @@
 package jp.cordea.voiceclock.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,25 +11,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Blue50,
+    primaryContainer = Blue800,
+    surface = Blue1000,
+    surfaceContainer = Blue900,
+    secondaryContainer = Blue800,
+    background = Blue1000,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Blue900,
+    primaryContainer = Blue200,
+    surface = Blue10,
+    surfaceContainer = Blue50,
+    secondaryContainer = Blue100,
+    background = Blue10,
 )
 
 @Composable
