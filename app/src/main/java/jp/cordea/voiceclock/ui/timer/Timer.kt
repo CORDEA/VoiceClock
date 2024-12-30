@@ -121,13 +121,19 @@ fun Timer(viewModel: TimerViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-            Progress()
+            Progress(
+                remaining = state.remaining,
+                sweepAngle = state.sweepAngle
+            )
         }
     }
 }
 
 @Composable
-private fun Progress() {
+private fun Progress(
+    remaining: Long,
+    sweepAngle: Float
+) {
     val color = MaterialTheme.colorScheme.primary
     Box(
         contentAlignment = Alignment.Center,
@@ -142,14 +148,18 @@ private fun Progress() {
         ) {
             drawArc(
                 color = color,
-                startAngle = 0f,
-                sweepAngle = 270f,
+                startAngle = -90f,
+                sweepAngle = sweepAngle,
                 useCenter = false,
                 style = Stroke(width = 8.dp.toPx())
             )
         }
         Text(
-            text = "00:00:00",
+            text = "%d:%02d:%02d".format(
+                remaining / 3600,
+                (remaining % 3600) / 60,
+                remaining % 60
+            ),
             style = MaterialTheme.typography.headlineLarge,
             fontSize = MaterialTheme.typography.headlineLarge.fontSize
         )

@@ -13,13 +13,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Duration
 import javax.inject.Inject
 
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase
 ) : ViewModel() {
-    private val remaining = MutableStateFlow("")
+    private val remaining = MutableStateFlow(0L)
+    private val sweepAngle = MutableStateFlow(360f)
     private val showController = MutableStateFlow(false)
     private val isValueExpanded = MutableStateFlow(false)
     private val isUnitExpanded = MutableStateFlow(false)
@@ -54,15 +56,17 @@ class TimerViewModel @Inject constructor(
             ) { unit, value, hours, minutes, seconds ->
                 Values(unit, value, hours, minutes, seconds)
             },
-            combine(remaining, showController, state) { remaining, showController, state ->
-                Triple(remaining, showController, state)
+            combine(remaining, sweepAngle, state) { remaining, angle, state ->
+                Triple(remaining, angle, state)
             },
+            showController,
             getTtsStateUseCase.execute()
-        ) { expanded, values, state, ttsState ->
+        ) { expanded, values, state, showController, ttsState ->
             TimerUiState(
                 remaining = state.first,
+                sweepAngle = state.second,
                 ttsState = ttsState,
-                showController = state.second,
+                showController = showController,
                 isValueExpanded = expanded.isValueExpanded,
                 isUnitExpanded = expanded.isUnitExpanded,
                 isHoursExpanded = expanded.isHoursExpanded,
@@ -79,7 +83,8 @@ class TimerViewModel @Inject constructor(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             TimerUiState(
-                "",
+                0L,
+                360f,
                 TtsState.LOADING,
                 showController = false,
                 isValueExpanded = false,
@@ -101,13 +106,20 @@ class TimerViewModel @Inject constructor(
     }
 
     fun onPlayClicked() {
+        if (hours.value == 0 && minutes.value == 0 && seconds.value == 0) {
+            return
+        }
         showController.value = false
         state.value = TimerState.STARTED
+        val duration = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
+        var next = duration
         job?.cancel()
         job = viewModelScope.launch {
             while (true) {
                 delay(1000L)
-                remaining.value = "00:00:00"
+                next = next.minusSeconds(1)
+                remaining.value = next.seconds
+                sweepAngle.value = -(next.seconds / duration.seconds.toFloat()) * 360f
             }
         }
     }

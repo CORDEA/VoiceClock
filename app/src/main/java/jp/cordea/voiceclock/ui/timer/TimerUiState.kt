@@ -4,7 +4,8 @@ import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
 
 data class TimerUiState(
-    val remaining: String,
+    val remaining: Long,
+    val sweepAngle: Float,
     val ttsState: TtsState,
     val showController: Boolean,
     val isValueExpanded: Boolean,
