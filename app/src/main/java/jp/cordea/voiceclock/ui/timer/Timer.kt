@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
+import java.time.Duration
 
 @Composable
 fun Timer(viewModel: TimerViewModel) {
@@ -145,7 +146,7 @@ fun Timer(viewModel: TimerViewModel) {
 @Composable
 private fun Progress(
     modifier: Modifier,
-    remaining: Long,
+    remaining: Duration,
     sweepAngle: Float
 ) {
     val color = MaterialTheme.colorScheme.primary
@@ -167,11 +168,7 @@ private fun Progress(
             )
         }
         Text(
-            text = "%d:%02d:%02d".format(
-                remaining / 3600,
-                (remaining % 3600) / 60,
-                remaining % 60
-            ),
+            text = remaining.formattedString(),
             style = MaterialTheme.typography.headlineLarge,
             fontSize = MaterialTheme.typography.headlineLarge.fontSize,
             color = MaterialTheme.colorScheme.primary
@@ -290,7 +287,7 @@ private fun Controller(
                     val range = when (unit) {
                         ClockUnit.HOUR -> (0..23)
                         ClockUnit.MINUTE -> (0..59)
-                        ClockUnit.SECOND -> (0..59)
+                        ClockUnit.SECOND -> (0..59).step(10)
                     }
                     range.forEach {
                         DropdownMenuItem(
@@ -307,9 +304,9 @@ private fun Controller(
                 Spacer(modifier = Modifier.width(8.dp))
                 Dropdown(
                     value = when (unit) {
-                        ClockUnit.HOUR -> "hour"
-                        ClockUnit.MINUTE -> "minute"
-                        ClockUnit.SECOND -> "second"
+                        ClockUnit.HOUR -> "hours"
+                        ClockUnit.MINUTE -> "minutes"
+                        ClockUnit.SECOND -> "seconds"
                     },
                     expanded = isUnitExpanded,
                     onExpandedChange = onUnitExpandChanged,
@@ -322,9 +319,9 @@ private fun Controller(
                             },
                             text = {
                                 when (it) {
-                                    ClockUnit.HOUR -> Text("hour")
-                                    ClockUnit.MINUTE -> Text("minute")
-                                    ClockUnit.SECOND -> Text("second")
+                                    ClockUnit.HOUR -> Text("hours")
+                                    ClockUnit.MINUTE -> Text("minutes")
+                                    ClockUnit.SECOND -> Text("seconds")
                                 }
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding

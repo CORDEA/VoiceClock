@@ -2,9 +2,10 @@ package jp.cordea.voiceclock.ui.timer
 
 import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
+import java.time.Duration
 
 data class TimerUiState(
-    val remaining: Long,
+    val remaining: Duration,
     val sweepAngle: Float,
     val ttsState: TtsState,
     val showController: Boolean,

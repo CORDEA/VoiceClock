@@ -20,7 +20,7 @@ import javax.inject.Inject
 class TimerViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase
 ) : ViewModel() {
-    private val remaining = MutableStateFlow(0L)
+    private val remaining = MutableStateFlow(Duration.ZERO)
     private val sweepAngle = MutableStateFlow(360f)
     private val showController = MutableStateFlow(false)
     private val isValueExpanded = MutableStateFlow(false)
@@ -83,7 +83,7 @@ class TimerViewModel @Inject constructor(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             TimerUiState(
-                0L,
+                Duration.ZERO,
                 360f,
                 TtsState.LOADING,
                 showController = false,
@@ -118,7 +118,7 @@ class TimerViewModel @Inject constructor(
             while (true) {
                 delay(1000L)
                 next = next.minusSeconds(1)
-                remaining.value = next.seconds
+                remaining.value = next
                 sweepAngle.value = -(next.seconds / duration.seconds.toFloat()) * 360f
             }
         }
@@ -154,6 +154,7 @@ class TimerViewModel @Inject constructor(
 
     fun onUnitChanged(it: ClockUnit) {
         unit.value = it
+        value.value = 0
         isUnitExpanded.value = false
     }
 
@@ -189,3 +190,11 @@ private data class Values(
     val minutes: Int,
     val seconds: Int
 )
+
+fun Duration.formattedString(): String {
+    return "%d:%02d:%02d".format(
+        seconds / 3600,
+        (seconds % 3600) / 60,
+        seconds % 60
+    )
+}
