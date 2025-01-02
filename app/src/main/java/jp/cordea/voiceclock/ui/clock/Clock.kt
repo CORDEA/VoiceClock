@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -152,6 +153,12 @@ private fun Controller(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            Text(
+                "Voice timing",
+                style = MaterialTheme.typography.titleSmall,
+                fontSize = MaterialTheme.typography.titleSmall.fontSize,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
