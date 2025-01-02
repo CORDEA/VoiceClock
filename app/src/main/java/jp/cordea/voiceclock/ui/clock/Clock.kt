@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import jp.cordea.voiceclock.R
 import jp.cordea.voiceclock.TtsState
 
 @Composable
@@ -55,23 +56,26 @@ fun Clock(viewModel: ClockViewModel) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Play",
+                            contentDescription = stringResource(R.string.clock_play),
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
                         )
                     }
 
-                TtsState.ERROR -> LargeFloatingActionButton(onClick = {
-                    Toast.makeText(
-                        context,
-                        "Something went wrong! It looks like TTS isn't available on your device.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Error",
-                        modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
-                    )
+                TtsState.ERROR -> {
+                    val message = stringResource(R.string.clock_error)
+                    LargeFloatingActionButton(onClick = {
+                        Toast.makeText(
+                            context,
+                            message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = stringResource(R.string.clock_error),
+                            modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
+                        )
+                    }
                 }
 
                 TtsState.LOADING -> LargeFloatingActionButton(onClick = {}) {
@@ -154,7 +158,7 @@ private fun Controller(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                "Voice timing",
+                stringResource(R.string.clock_controller_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontSize = MaterialTheme.typography.titleSmall.fontSize,
             )
@@ -162,7 +166,7 @@ private fun Controller(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("At")
+                Text(stringResource(R.string.clock_controller_prefix))
                 Spacer(modifier = Modifier.width(16.dp))
                 ExposedDropdownMenuBox(
                     modifier = Modifier.weight(1f),
@@ -211,9 +215,9 @@ private fun Controller(
                     TextField(
                         modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
                         value = when (unit) {
-                            ClockUnit.HOUR -> "hour"
-                            ClockUnit.MINUTE -> "minute"
-                            ClockUnit.SECOND -> "second"
+                            ClockUnit.HOUR -> stringResource(R.string.clock_controller_unit_hour)
+                            ClockUnit.MINUTE -> stringResource(R.string.clock_controller_unit_minute)
+                            ClockUnit.SECOND -> stringResource(R.string.clock_controller_unit_second)
                         },
                         onValueChange = {},
                         singleLine = true,
@@ -234,9 +238,14 @@ private fun Controller(
                                 },
                                 text = {
                                     when (it) {
-                                        ClockUnit.HOUR -> Text("hour")
-                                        ClockUnit.MINUTE -> Text("minute")
-                                        ClockUnit.SECOND -> Text("second")
+                                        ClockUnit.HOUR ->
+                                            Text(stringResource(R.string.clock_controller_unit_hour))
+
+                                        ClockUnit.MINUTE ->
+                                            Text(stringResource(R.string.clock_controller_unit_minute))
+
+                                        ClockUnit.SECOND ->
+                                            Text(stringResource(R.string.clock_controller_unit_second))
                                     }
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -246,14 +255,14 @@ private fun Controller(
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                Text("mark")
+                Text(stringResource(R.string.clock_controller_suffix))
             }
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = onClicked,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Play")
+                Text(stringResource(R.string.clock_controller_play))
             }
         }
     }

@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">Voice Clock</string>
+
+    <string name="clock_play">Play</string>
+    <string name="clock_error">Error</string>
+    <string name="clock_controller_title">Voice timing</string>
+    <string name="clock_controller_prefix">At</string>
+    <string name="clock_controller_suffix">mark</string>
+    <string name="clock_controller_play">Play</string>
+    <string name="clock_controller_unit_hour">hour</string>
+    <string name="clock_controller_unit_minute">minute</string>
+    <string name="clock_controller_unit_second">second</string>
+
+    <string name="timer_play">Play</string>
+    <string name="timer_error">Error</string>
+    <string name="timer_controller_title">Voice timing</string>
+    <string name="timer_controller_play">Play</string>
+    <string name="timer_controller_prefix">Every</string>
+    <string name="timer_controller_unit_hour">hours</string>
+    <string name="timer_controller_unit_minute">minutes</string>
+    <string name="timer_controller_unit_second">seconds</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_oss_license">OSS licenses</string>
+
+    <string name="tts_error">Something went wrong! It looks like TTS is not available on your device.</string>
 </resources>

@@ -16,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import jp.cordea.voiceclock.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,7 +29,7 @@ fun Settings() {
         topBar = {
             MediumTopAppBar(
                 title = {
-                    Text("Settings")
+                    Text(stringResource(R.string.settings_title))
                 }
             )
         }
@@ -37,7 +39,7 @@ fun Settings() {
             contentPadding = PaddingValues(16.dp)
         ) {
             item {
-                Item("OSS Licenses") {
+                Item(stringResource(R.string.settings_oss_license)) {
                     context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
                 }
             }

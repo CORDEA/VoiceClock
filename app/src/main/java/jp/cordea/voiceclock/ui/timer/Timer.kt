@@ -41,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import jp.cordea.voiceclock.R
 import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
 import java.time.Duration
@@ -61,23 +63,26 @@ fun Timer(viewModel: TimerViewModel) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Play",
+                            contentDescription = stringResource(R.string.timer_play),
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
                         )
                     }
 
-                TtsState.ERROR -> LargeFloatingActionButton(onClick = {
-                    Toast.makeText(
-                        context,
-                        "Something went wrong! It looks like TTS isn't available on your device.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Error",
-                        modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
-                    )
+                TtsState.ERROR -> {
+                    val message = stringResource(R.string.tts_error)
+                    LargeFloatingActionButton(onClick = {
+                        Toast.makeText(
+                            context,
+                            message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = stringResource(R.string.timer_error),
+                            modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
+                        )
+                    }
                 }
 
                 TtsState.LOADING -> LargeFloatingActionButton(onClick = {}) {
@@ -293,7 +298,7 @@ private fun Controller(
             HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Voice timing",
+                stringResource(R.string.timer_controller_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontSize = MaterialTheme.typography.titleSmall.fontSize,
             )
@@ -301,7 +306,7 @@ private fun Controller(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Every")
+                Text(stringResource(R.string.timer_controller_prefix))
                 Spacer(modifier = Modifier.width(16.dp))
                 Dropdown(
                     value = value.toString(),
@@ -329,9 +334,9 @@ private fun Controller(
                 Spacer(modifier = Modifier.width(8.dp))
                 Dropdown(
                     value = when (unit) {
-                        ClockUnit.HOUR -> "hours"
-                        ClockUnit.MINUTE -> "minutes"
-                        ClockUnit.SECOND -> "seconds"
+                        ClockUnit.HOUR -> stringResource(R.string.timer_controller_unit_hour)
+                        ClockUnit.MINUTE -> stringResource(R.string.timer_controller_unit_minute)
+                        ClockUnit.SECOND -> stringResource(R.string.timer_controller_unit_second)
                     },
                     expanded = isUnitExpanded,
                     onExpandedChange = onUnitExpandChanged,
@@ -344,9 +349,14 @@ private fun Controller(
                             },
                             text = {
                                 when (it) {
-                                    ClockUnit.HOUR -> Text("hours")
-                                    ClockUnit.MINUTE -> Text("minutes")
-                                    ClockUnit.SECOND -> Text("seconds")
+                                    ClockUnit.HOUR ->
+                                        Text(stringResource(R.string.timer_controller_unit_hour))
+
+                                    ClockUnit.MINUTE ->
+                                        Text(stringResource(R.string.timer_controller_unit_minute))
+
+                                    ClockUnit.SECOND ->
+                                        Text(stringResource(R.string.timer_controller_unit_second))
                                 }
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -359,7 +369,7 @@ private fun Controller(
                 onClick = onClicked,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Play")
+                Text(stringResource(R.string.timer_controller_play))
             }
         }
     }
