@@ -1,5 +1,6 @@
 package jp.cordea.voiceclock.ui.timer
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
@@ -45,6 +47,7 @@ import java.time.Duration
 
 @Composable
 fun Timer(viewModel: TimerViewModel) {
+    val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
     Scaffold(
         floatingActionButton = {
@@ -62,7 +65,20 @@ fun Timer(viewModel: TimerViewModel) {
                         )
                     }
 
-                TtsState.ERROR -> {}
+                TtsState.ERROR -> LargeFloatingActionButton(onClick = {
+                    Toast.makeText(
+                        context,
+                        "Something went wrong! It looks like TTS isn't available on your device.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Error",
+                        modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
+                    )
+                }
+
                 TtsState.LOADING -> LargeFloatingActionButton(onClick = {}) {
                     CircularProgressIndicator()
                 }
