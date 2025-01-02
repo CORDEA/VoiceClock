@@ -32,6 +32,10 @@ class TtsService @Inject constructor(
     fun start() {
         tts = TextToSpeech(context, this)
     }
+
+    fun cancel() {
+        _state.tryEmit(TtsState.ERROR)
+    }
 }
 
 enum class TtsState {

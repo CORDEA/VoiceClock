@@ -1,5 +1,6 @@
 package jp.cordea.voiceclock.ui.home
 
+import android.app.Activity
 import android.content.Intent
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,14 +36,23 @@ fun Home(viewModel: HomeViewModel) {
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        if (it.resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-            viewModel.onTtsReceived()
+        when (it.resultCode) {
+            TextToSpeech.Engine.CHECK_VOICE_DATA_PASS -> viewModel.onTtsReceived()
+            Activity.RESULT_CANCELED -> viewModel.onTtsCancelled()
+            else -> viewModel.onTtsRequired()
         }
     }
     LaunchedEffect(Unit) {
         launcher.launch(
             Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA)
         )
+    }
+    val uiState by viewModel.uiState.collectAsState()
+    if (uiState.isTtsRequired) {
+        launcher.launch(
+            Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+        )
+        viewModel.onTtsRequested()
     }
     Scaffold(
         bottomBar = {
