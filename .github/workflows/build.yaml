@@ -14,7 +14,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 17
-      - run: echo -n ${{ secrets.KEYSTORE }} > release.keystore
+      - run: echo -n ${{ secrets.KEYSTORE }} | base64 -d > release.keystore
       - run: ./gradlew bundleRelease
         env:
           ORG_GRADLE_PROJECT_storePassword: ${{ secrets.STORE_PASSWORD }}
