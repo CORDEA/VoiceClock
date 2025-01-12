@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,8 +63,8 @@ fun Timer(viewModel: TimerViewModel) {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = stringResource(R.string.timer_play),
+                            imageVector = if (state.state == TimerState.STARTED) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = stringResource(if (state.state == TimerState.STARTED) R.string.timer_pause else R.string.timer_play),
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
                         )
                     }

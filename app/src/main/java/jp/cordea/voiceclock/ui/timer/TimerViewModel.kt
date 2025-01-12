@@ -104,6 +104,16 @@ class TimerViewModel @Inject constructor(
         )
 
     fun onFabClicked() {
+        if (state.value == TimerState.STARTED) {
+            job?.cancel()
+            state.value = TimerState.PAUSED
+            return
+        }
+        if (state.value == TimerState.PAUSED) {
+            play(remaining.value)
+            state.value = TimerState.STARTED
+            return
+        }
         showController.value = true
     }
 
@@ -113,26 +123,8 @@ class TimerViewModel @Inject constructor(
         }
         showController.value = false
         state.value = TimerState.STARTED
-        val timer = value.value *
-                when (unit.value) {
-                    ClockUnit.HOUR -> 3600
-                    ClockUnit.MINUTE -> 60
-                    ClockUnit.SECOND -> 1
-                }
         val duration = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
-        var next = duration
-        job?.cancel()
-        job = viewModelScope.launch {
-            while (true) {
-                delay(1000L)
-                next = next.minusSeconds(1)
-                remaining.value = next
-                sweepAngle.value = -(next.seconds / duration.seconds.toFloat()) * 360f
-                if (next.seconds % timer == 0L) {
-                    readTextUseCase.execute(next.formattedString())
-                }
-            }
-        }
+        play(duration)
     }
 
     fun onHoursChanged(it: Int) {
@@ -183,6 +175,29 @@ class TimerViewModel @Inject constructor(
 
     fun onSecondsExpandChanged(it: Boolean) {
         isSecondsExpanded.value = it
+    }
+
+    private fun play(duration: Duration) {
+        val total = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
+        val timer = value.value *
+                when (unit.value) {
+                    ClockUnit.HOUR -> 3600
+                    ClockUnit.MINUTE -> 60
+                    ClockUnit.SECOND -> 1
+                }
+        var next = duration
+        job?.cancel()
+        job = viewModelScope.launch {
+            while (true) {
+                delay(1000L)
+                next = next.minusSeconds(1)
+                remaining.value = next
+                sweepAngle.value = -(next.seconds / total.seconds.toFloat()) * 360f
+                if (next.seconds % timer == 0L) {
+                    readTextUseCase.execute(next.formattedString())
+                }
+            }
+        }
     }
 }
 

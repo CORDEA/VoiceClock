@@ -2,6 +2,7 @@
     <string name="app_name">Voice Clock</string>
 
     <string name="clock_play">Play</string>
+    <string name="clock_stop">Stop</string>
     <string name="clock_error">Error</string>
     <string name="clock_controller_title">Voice timing</string>
     <string name="clock_controller_prefix">At</string>
@@ -12,6 +13,8 @@
     <string name="clock_controller_unit_second">second</string>
 
     <string name="timer_play">Play</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_stop">Stop</string>
     <string name="timer_error">Error</string>
     <string name="timer_controller_title">Voice timing</string>
     <string name="timer_controller_play">Play</string>

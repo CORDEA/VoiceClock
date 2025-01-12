@@ -94,6 +94,10 @@ class ClockViewModel @Inject constructor(
         )
 
     fun onFabClicked() {
+        if (isStarted.value) {
+            isStarted.value = false
+            return
+        }
         showController.value = true
     }
 

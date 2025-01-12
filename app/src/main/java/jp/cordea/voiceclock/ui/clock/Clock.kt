@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -55,8 +56,8 @@ fun Clock(viewModel: ClockViewModel) {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = stringResource(R.string.clock_play),
+                            imageVector = if (state.isStarted) Icons.Default.Stop else Icons.Default.PlayArrow,
+                            contentDescription = stringResource(if (state.isStarted) R.string.clock_stop else R.string.clock_play),
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize)
                         )
                     }
