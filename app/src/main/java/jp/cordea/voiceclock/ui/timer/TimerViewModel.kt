@@ -177,6 +177,13 @@ class TimerViewModel @Inject constructor(
         isSecondsExpanded.value = it
     }
 
+    fun onResetClicked() {
+        sweepAngle.value = 360f
+        remaining.value = Duration.ZERO
+        job?.cancel()
+        state.value = TimerState.STOPPED
+    }
+
     private fun play(duration: Duration) {
         val total = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
         val timer = value.value *

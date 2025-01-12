@@ -14,7 +14,7 @@
 
     <string name="timer_play">Play</string>
     <string name="timer_pause">Pause</string>
-    <string name="timer_stop">Stop</string>
+    <string name="timer_reset">Reset</string>
     <string name="timer_error">Error</string>
     <string name="timer_controller_title">Voice timing</string>
     <string name="timer_controller_play">Play</string>

@@ -160,7 +160,11 @@ fun Timer(viewModel: TimerViewModel) {
                         }
                     },
                 remaining = state.remaining,
-                sweepAngle = state.sweepAngle
+                sweepAngle = state.sweepAngle,
+                visibleReset = state.state == TimerState.PAUSED,
+                onResetClicked = {
+                    viewModel.onResetClicked()
+                }
             )
         }
     }
@@ -170,7 +174,9 @@ fun Timer(viewModel: TimerViewModel) {
 private fun Progress(
     modifier: Modifier,
     remaining: Duration,
-    sweepAngle: Float
+    sweepAngle: Float,
+    visibleReset: Boolean,
+    onResetClicked: () -> Unit = {}
 ) {
     val color = MaterialTheme.colorScheme.primary
     Box(
@@ -190,12 +196,22 @@ private fun Progress(
                 style = Stroke(width = 8.dp.toPx())
             )
         }
-        Text(
-            text = remaining.formattedString(),
-            style = MaterialTheme.typography.headlineLarge,
-            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-            color = MaterialTheme.colorScheme.primary
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = remaining.formattedString(),
+                style = MaterialTheme.typography.headlineLarge,
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                color = MaterialTheme.colorScheme.primary
+            )
+            if (visibleReset) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(onClick = {
+                    onResetClicked()
+                }) {
+                    Text(stringResource(R.string.timer_reset))
+                }
+            }
+        }
     }
 }
 
