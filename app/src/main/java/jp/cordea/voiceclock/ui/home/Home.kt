@@ -10,11 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,11 +44,13 @@ fun Home(viewModel: HomeViewModel) {
         )
     }
     val uiState by viewModel.uiState.collectAsState()
-    if (uiState.isTtsRequired) {
-        launcher.launch(
-            Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
-        )
-        viewModel.onTtsRequested()
+    LaunchedEffect(uiState.isTtsRequired) {
+        if (uiState.isTtsRequired) {
+            launcher.launch(
+                Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+            )
+            viewModel.onTtsRequested()
+        }
     }
     Scaffold(
         bottomBar = {
