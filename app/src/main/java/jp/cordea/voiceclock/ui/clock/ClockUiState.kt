@@ -10,11 +10,19 @@ data class ClockUiState(
     val isUnitExpanded: Boolean,
     val unit: ClockUnit,
     val value: Int,
-    val isStarted: Boolean
+    val timerState: TimerState
 )
 
 enum class ClockUnit {
     HOUR,
     MINUTE,
     SECOND
+}
+
+enum class TimerState {
+    IDLE,
+    STARTING,
+    STARTED,
+    STOPPING,
+    STOPPED,
 }

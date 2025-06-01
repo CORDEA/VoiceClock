@@ -55,6 +55,9 @@ class TimerService : Service() {
     }
 
     fun startTimer(value: Int, unit: ClockUnit) {
+        Intent(applicationContext, TimerService::class.java).also { intent ->
+            startForegroundService(intent)
+        }
         serviceJob.cancelChildren()
         serviceScope.launch {
             while (true) {
