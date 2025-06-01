@@ -27,4 +27,10 @@
     <string name="settings_oss_license">OSS licenses</string>
 
     <string name="tts_error">Something went wrong! It looks like TTS is not available on your device.</string>
+
+    <string name="timer_service_channel_name">Timer</string>
+    <string name="timer_service_channel_id">timer_channel</string>
+    <string name="timer_service_notification_title_initial">Waiting to start</string>
+
+    <string name="explanation_for_special_use">To maintain the timer</string>
 </resources>
