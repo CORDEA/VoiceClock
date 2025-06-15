@@ -6,19 +6,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.voiceclock.GetTtsStateUseCase
+import jp.cordea.voiceclock.TimerServiceProvider
 import jp.cordea.voiceclock.TtsState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class ClockViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase,
+    timerServiceProvider: TimerServiceProvider,
 ) : ViewModel() {
     companion object {
         private val FORMAT = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
@@ -32,6 +42,8 @@ class ClockViewModel @Inject constructor(
     private val unit = MutableStateFlow(ClockUnit.MINUTE)
     private val state = MutableStateFlow(TimerState.IDLE)
 
+    private val request = Channel<Boolean>()
+
     init {
         viewModelScope.launch {
             while (true) {
@@ -41,6 +53,22 @@ class ClockViewModel @Inject constructor(
                 time.value = now
             }
         }
+        request
+            .consumeAsFlow()
+            .flatMapLatest { start ->
+                timerServiceProvider.get()
+                    .map { start to it }
+            }
+            .onEach { (start, service) ->
+                if (start) {
+                    service.startTimer(value.value, unit.value)
+                    state.value = TimerState.STARTED
+                } else {
+                    service.stopTimer()
+                    state.value = TimerState.STOPPED
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     val uiState =
@@ -87,7 +115,7 @@ class ClockViewModel @Inject constructor(
 
     fun onFabClicked() {
         if (state.value == TimerState.STARTED) {
-            state.value = TimerState.STOPPING
+            request.trySend(false)
             return
         }
         showController.value = true
@@ -95,16 +123,7 @@ class ClockViewModel @Inject constructor(
 
     fun onPlayClicked() {
         showController.value = false
-        state.value = TimerState.STARTING
-    }
-
-    fun onTimerCalled() {
-        if (state.value == TimerState.STARTING) {
-            state.value = TimerState.STARTED
-        }
-        if (state.value == TimerState.STOPPING) {
-            state.value = TimerState.STOPPED
-        }
+        request.trySend(true)
     }
 
     fun onValueExpandChanged(it: Boolean) {
@@ -127,5 +146,10 @@ class ClockViewModel @Inject constructor(
 
     fun onDismissController() {
         showController.value = false
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        request.cancel()
     }
 }

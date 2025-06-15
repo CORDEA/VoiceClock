@@ -1,6 +1,10 @@
 package jp.cordea.voiceclock
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
@@ -10,7 +14,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import dagger.hilt.android.AndroidEntryPoint
 import jp.cordea.voiceclock.ui.clock.ClockUnit
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -72,13 +81,16 @@ class TimerService : Service() {
                 if (calendar.get(field) == value) {
                     readTextUseCase.execute(now)
                 }
-                getSystemService<NotificationManager>()?.notify(NOTIFICATION_ID, createNotification(now))
+                getSystemService<NotificationManager>()?.notify(
+                    NOTIFICATION_ID,
+                    createNotification(now)
+                )
             }
         }
     }
 
     fun stopTimer() {
-        serviceJob.cancel()
+        serviceJob.cancelChildren()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

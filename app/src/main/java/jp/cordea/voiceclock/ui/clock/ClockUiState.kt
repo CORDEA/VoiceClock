@@ -21,8 +21,6 @@ enum class ClockUnit {
 
 enum class TimerState {
     IDLE,
-    STARTING,
     STARTED,
-    STOPPING,
     STOPPED,
 }

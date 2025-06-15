@@ -1,17 +1,14 @@
 package jp.cordea.voiceclock.ui.clock
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
@@ -19,49 +16,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import jp.cordea.voiceclock.R
-import jp.cordea.voiceclock.TimerService
 import jp.cordea.voiceclock.TtsState
 
 @Composable
 fun Clock(viewModel: ClockViewModel) {
     val context = LocalContext.current
-    val timerService = remember { mutableStateOf<TimerService?>(null) }
-    val serviceConnection = remember {
-        object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                val binder = service as TimerService.TimerBinder
-                timerService.value = binder.getService()
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                timerService.value = null
-            }
-        }
-    }
-    DisposableEffect(Unit) {
-        Intent(context, TimerService::class.java).also { intent ->
-            context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        }
-        onDispose {
-            context.unbindService(serviceConnection)
-        }
-    }
     val state by viewModel.uiState.collectAsState()
-    LaunchedEffect(state.timerState, timerService) {
-        val service = timerService.value ?: return@LaunchedEffect
-        when (state.timerState) {
-            TimerState.IDLE -> {}
-            TimerState.STARTED -> {}
-            TimerState.STOPPED -> {}
-            TimerState.STARTING -> service.startTimer(
-                state.value,
-                state.unit,
-            )
-
-            TimerState.STOPPING -> service.stopTimer()
-        }
-        viewModel.onTimerCalled()
-    }
     Scaffold(
         floatingActionButton = {
             when (state.ttsState) {
