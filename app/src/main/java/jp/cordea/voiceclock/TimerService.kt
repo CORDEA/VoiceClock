@@ -14,12 +14,14 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import dagger.hilt.android.AndroidEntryPoint
 import jp.cordea.voiceclock.ui.clock.ClockUnit
+import jp.cordea.voiceclock.ui.timer.formattedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.Duration
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -60,10 +62,10 @@ class TimerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopTimer()
+        stop()
     }
 
-    fun startTimer(value: Int, unit: ClockUnit) {
+    fun startClock(value: Int, unit: ClockUnit) {
         Intent(applicationContext, TimerService::class.java).also { intent ->
             startForegroundService(intent)
         }
@@ -82,14 +84,36 @@ class TimerService : Service() {
                     readTextUseCase.execute(now)
                 }
                 getSystemService<NotificationManager>()?.notify(
-                    NOTIFICATION_ID,
-                    createNotification(now)
+                    NOTIFICATION_ID, createNotification(now)
                 )
             }
         }
     }
 
-    fun stopTimer() {
+    fun startTimer(duration: Duration, total: Duration, timer: Int) {
+        var next = duration
+        Intent(applicationContext, TimerService::class.java).also { intent ->
+            startForegroundService(intent)
+        }
+        serviceJob.cancelChildren()
+        serviceScope.launch {
+            while (true) {
+                delay(1000L)
+                next = next.minusSeconds(1)
+                // TODO
+                val remaining = next
+                val sweepAngle = -(next.seconds / total.seconds.toFloat()) * 360f
+                if (next.seconds % timer == 0L) {
+                    readTextUseCase.execute(next.formattedString())
+                }
+                getSystemService<NotificationManager>()?.notify(
+                    NOTIFICATION_ID, createNotification(remaining.formattedString())
+                )
+            }
+        }
+    }
+
+    fun stop() {
         serviceJob.cancelChildren()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()

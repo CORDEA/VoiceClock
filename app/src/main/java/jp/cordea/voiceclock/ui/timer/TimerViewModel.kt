@@ -4,23 +4,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.voiceclock.GetTtsStateUseCase
-import jp.cordea.voiceclock.ReadTextUseCase
+import jp.cordea.voiceclock.TimerServiceProvider
 import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.time.Duration
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class TimerViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase,
-    private val readTextUseCase: ReadTextUseCase
+    private val timerServiceProvider: TimerServiceProvider,
 ) : ViewModel() {
     private val remaining = MutableStateFlow(Duration.ZERO)
     private val sweepAngle = MutableStateFlow(360f)
@@ -36,7 +41,33 @@ class TimerViewModel @Inject constructor(
     private val value = MutableStateFlow(1)
     private val unit = MutableStateFlow(ClockUnit.MINUTE)
     private val state = MutableStateFlow(TimerState.STOPPED)
-    private var job: Job? = null
+
+    private val request = Channel<Duration>()
+
+    init {
+        request
+            .consumeAsFlow()
+            .flatMapLatest { start ->
+                timerServiceProvider.get()
+                    .map { start to it }
+            }
+            .onEach { (duration, service) ->
+                if (duration.isZero) {
+                    service.stop()
+                } else {
+                    val total =
+                        Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
+                    val timer = value.value *
+                            when (unit.value) {
+                                ClockUnit.HOUR -> 3600
+                                ClockUnit.MINUTE -> 60
+                                ClockUnit.SECOND -> 1
+                            }
+                    service.startTimer(duration, total, timer)
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     val uiState =
         combine(
@@ -105,12 +136,12 @@ class TimerViewModel @Inject constructor(
 
     fun onFabClicked() {
         if (state.value == TimerState.STARTED) {
-            job?.cancel()
+            request.trySend(Duration.ZERO)
             state.value = TimerState.PAUSED
             return
         }
         if (state.value == TimerState.PAUSED) {
-            play(remaining.value)
+            request.trySend(remaining.value)
             state.value = TimerState.STARTED
             return
         }
@@ -124,7 +155,7 @@ class TimerViewModel @Inject constructor(
         showController.value = false
         state.value = TimerState.STARTED
         val duration = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
-        play(duration)
+        request.trySend(duration)
     }
 
     fun onHoursChanged(it: Int) {
@@ -180,31 +211,8 @@ class TimerViewModel @Inject constructor(
     fun onResetClicked() {
         sweepAngle.value = 360f
         remaining.value = Duration.ZERO
-        job?.cancel()
+        request.trySend(Duration.ZERO)
         state.value = TimerState.STOPPED
-    }
-
-    private fun play(duration: Duration) {
-        val total = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
-        val timer = value.value *
-                when (unit.value) {
-                    ClockUnit.HOUR -> 3600
-                    ClockUnit.MINUTE -> 60
-                    ClockUnit.SECOND -> 1
-                }
-        var next = duration
-        job?.cancel()
-        job = viewModelScope.launch {
-            while (true) {
-                delay(1000L)
-                next = next.minusSeconds(1)
-                remaining.value = next
-                sweepAngle.value = -(next.seconds / total.seconds.toFloat()) * 360f
-                if (next.seconds % timer == 0L) {
-                    readTextUseCase.execute(next.formattedString())
-                }
-            }
-        }
     }
 }
 

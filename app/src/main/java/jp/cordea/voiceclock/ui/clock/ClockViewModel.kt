@@ -61,10 +61,10 @@ class ClockViewModel @Inject constructor(
             }
             .onEach { (start, service) ->
                 if (start) {
-                    service.startTimer(value.value, unit.value)
+                    service.startClock(value.value, unit.value)
                     state.value = TimerState.STARTED
                 } else {
-                    service.stopTimer()
+                    service.stop()
                     state.value = TimerState.STOPPED
                 }
             }
