@@ -8,6 +8,7 @@ import android.os.IBinder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,7 @@ class TimerServiceProvider @Inject constructor(
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
+                cancel()
             }
         }
         Intent(context, TimerService::class.java).also { intent ->
