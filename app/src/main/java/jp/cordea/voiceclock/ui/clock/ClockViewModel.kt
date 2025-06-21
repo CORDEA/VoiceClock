@@ -1,16 +1,15 @@
 package jp.cordea.voiceclock.ui.clock
 
 import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.voiceclock.GetTtsStateUseCase
+import jp.cordea.voiceclock.ObserveCurrentTimeUseCase
 import jp.cordea.voiceclock.TimerServiceProvider
 import jp.cordea.voiceclock.TtsState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
@@ -29,6 +27,7 @@ import javax.inject.Inject
 class ClockViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase,
     timerServiceProvider: TimerServiceProvider,
+    observeCurrentTimeUseCase: ObserveCurrentTimeUseCase
 ) : ViewModel() {
     companion object {
         private val FORMAT = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
@@ -45,14 +44,11 @@ class ClockViewModel @Inject constructor(
     private val request = Channel<Boolean>()
 
     init {
-        viewModelScope.launch {
-            while (true) {
-                delay(1000L)
-                val calendar = Calendar.getInstance()
-                val now = FORMAT.format(calendar.time)
-                time.value = now
+        observeCurrentTimeUseCase.execute()
+            .onEach {
+                time.value = FORMAT.format(it.time)
             }
-        }
+            .launchIn(viewModelScope)
         request
             .consumeAsFlow()
             .flatMapLatest { start ->
