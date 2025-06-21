@@ -108,12 +108,15 @@ class TimerService : Service() {
                 delay(1000L)
                 next = next.minusSeconds(1)
                 _timerChannel.send(next)
-                if (next.seconds % timer == 0L) {
-                    readTextUseCase.execute(next.formattedString())
-                }
                 if (next.isZero) {
+                    readTextUseCase.execute(
+                        getString(R.string.timer_finished_message)
+                    )
                     stop()
                     return@launch
+                }
+                if (next.seconds % timer == 0L) {
+                    readTextUseCase.execute(next.formattedString())
                 }
                 getSystemService<NotificationManager>()?.notify(
                     NOTIFICATION_ID, createNotification(next.formattedString())

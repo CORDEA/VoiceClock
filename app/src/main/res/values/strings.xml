@@ -22,6 +22,7 @@
     <string name="timer_controller_unit_hour">hours</string>
     <string name="timer_controller_unit_minute">minutes</string>
     <string name="timer_controller_unit_second">seconds</string>
+    <string name="timer_finished_message">Time\'s up</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_oss_license">OSS licenses</string>
