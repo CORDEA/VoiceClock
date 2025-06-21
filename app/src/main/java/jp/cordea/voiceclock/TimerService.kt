@@ -19,6 +19,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -37,6 +39,10 @@ class TimerService : Service() {
     private val binder = TimerBinder()
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+
+    val timerChannel: ReceiveChannel<Duration>
+        get() = _timerChannel
+    private val _timerChannel = Channel<Duration>(Channel.CONFLATED)
 
     override fun onCreate() {
         super.onCreate()
@@ -62,6 +68,7 @@ class TimerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        _timerChannel.close()
         stop()
     }
 
@@ -90,7 +97,7 @@ class TimerService : Service() {
         }
     }
 
-    fun startTimer(duration: Duration, total: Duration, timer: Int) {
+    fun startTimer(duration: Duration, timer: Int) {
         var next = duration
         Intent(applicationContext, TimerService::class.java).also { intent ->
             startForegroundService(intent)
@@ -100,14 +107,16 @@ class TimerService : Service() {
             while (true) {
                 delay(1000L)
                 next = next.minusSeconds(1)
-                // TODO
-                val remaining = next
-                val sweepAngle = -(next.seconds / total.seconds.toFloat()) * 360f
+                _timerChannel.send(next)
                 if (next.seconds % timer == 0L) {
                     readTextUseCase.execute(next.formattedString())
                 }
+                if (next.isZero) {
+                    stop()
+                    return@launch
+                }
                 getSystemService<NotificationManager>()?.notify(
-                    NOTIFICATION_ID, createNotification(remaining.formattedString())
+                    NOTIFICATION_ID, createNotification(next.formattedString())
                 )
             }
         }

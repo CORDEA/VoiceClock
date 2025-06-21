@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import java.time.Duration
 import javax.inject.Inject
@@ -51,19 +52,34 @@ class TimerViewModel @Inject constructor(
                 timerServiceProvider.get()
                     .map { start to it }
             }
+            .map { (duration, service) ->
+                val total =
+                    Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
+                Triple(duration, service, total)
+            }
             .onEach { (duration, service) ->
                 if (duration.isZero) {
                     service.stop()
                 } else {
-                    val total =
-                        Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
                     val timer = value.value *
                             when (unit.value) {
                                 ClockUnit.HOUR -> 3600
                                 ClockUnit.MINUTE -> 60
                                 ClockUnit.SECOND -> 1
                             }
-                    service.startTimer(duration, total, timer)
+                    service.startTimer(duration, timer)
+                }
+            }
+            .flatMapLatest { (_, service, total) ->
+                service.timerChannel
+                    .receiveAsFlow()
+                    .map { it to total }
+            }
+            .onEach { (r, t) ->
+                remaining.value = r
+                sweepAngle.value = -(r.seconds / t.seconds.toFloat()) * 360f
+                if (r.isZero) {
+                    state.value = TimerState.STOPPED
                 }
             }
             .launchIn(viewModelScope)
