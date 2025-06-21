@@ -6,27 +6,27 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import dagger.hilt.android.AndroidEntryPoint
-import jp.cordea.voiceclock.ui.timer.formattedString
+import jp.cordea.voiceclock.ui.clock.ClockUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.time.Duration
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TimerService : Service() {
+class ClockService : Service() {
     companion object {
-        private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_ID = 2
+        private val FORMAT = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
     }
 
     @Inject
@@ -35,19 +35,15 @@ class TimerService : Service() {
     @Inject
     lateinit var observeCurrentTimeUseCase: ObserveCurrentTimeUseCase
 
-    private val binder = TimerBinder()
+    private val binder = ClockBinder()
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
-
-    val timerChannel: ReceiveChannel<Duration>
-        get() = _timerChannel
-    private val _timerChannel = Channel<Duration>(Channel.CONFLATED)
 
     override fun onCreate() {
         super.onCreate()
         val channel = NotificationChannel(
-            getString(R.string.timer_service_channel_id),
-            getString(R.string.timer_service_channel_name),
+            getString(R.string.clock_service_channel_id),
+            getString(R.string.clock_service_channel_name),
             NotificationManager.IMPORTANCE_LOW
         )
         getSystemService<NotificationManager>()?.createNotificationChannel(channel)
@@ -56,7 +52,7 @@ class TimerService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(
             NOTIFICATION_ID,
-            createNotification(getString(R.string.timer_service_notification_title_initial))
+            createNotification(getString(R.string.clock_service_notification_title_initial))
         )
         return START_STICKY
     }
@@ -67,36 +63,39 @@ class TimerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        _timerChannel.close()
         stop()
     }
 
-    fun start(duration: Duration, timer: Int) {
-        var next = duration
-        Intent(applicationContext, TimerService::class.java).also { intent ->
+    fun start(value: Int, unit: ClockUnit) {
+        Intent(applicationContext, ClockService::class.java).also { intent ->
             startForegroundService(intent)
         }
         serviceJob.cancelChildren()
-        serviceScope.launch {
-            while (true) {
-                delay(1000L)
-                next = next.minusSeconds(1)
-                _timerChannel.send(next)
-                if (next.isZero) {
-                    readTextUseCase.execute(
-                        getString(R.string.timer_finished_message)
-                    )
-                    stop()
-                    return@launch
-                }
-                if (next.seconds % timer == 0L) {
-                    readTextUseCase.execute(next.formattedString())
+        observeCurrentTimeUseCase.execute()
+            .onEach { calendar ->
+                val now = FORMAT.format(calendar.time)
+                when (unit) {
+                    ClockUnit.HOUR ->
+                        if (calendar.get(Calendar.HOUR_OF_DAY) == value) {
+                            if (calendar.get(Calendar.MINUTE) == 0 && calendar.get(Calendar.SECOND) == 0) {
+                                readTextUseCase.execute(now)
+                            }
+                        }
+
+                    ClockUnit.MINUTE ->
+                        if (calendar.get(Calendar.MINUTE) == value && calendar.get(Calendar.SECOND) == 0) {
+                            readTextUseCase.execute(now)
+                        }
+
+                    ClockUnit.SECOND -> if (calendar.get(Calendar.SECOND) == value) {
+                        readTextUseCase.execute(now)
+                    }
                 }
                 getSystemService<NotificationManager>()?.notify(
-                    NOTIFICATION_ID, createNotification(next.formattedString())
+                    NOTIFICATION_ID, createNotification(now)
                 )
             }
-        }
+            .launchIn(serviceScope)
     }
 
     fun stop() {
@@ -112,14 +111,14 @@ class TimerService : Service() {
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE
         )
-        return NotificationCompat.Builder(this, getString(R.string.timer_service_channel_id))
+        return NotificationCompat.Builder(this, getString(R.string.clock_service_channel_id))
             .setContentTitle(contentText)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .build()
     }
 
-    inner class TimerBinder : Binder() {
-        fun getService(): TimerService = this@TimerService
+    inner class ClockBinder : Binder() {
+        fun getService(): ClockService = this@ClockService
     }
 }

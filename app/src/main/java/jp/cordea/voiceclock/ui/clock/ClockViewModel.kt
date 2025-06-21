@@ -4,20 +4,20 @@ import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jp.cordea.voiceclock.ClockServiceProvider
 import jp.cordea.voiceclock.GetTtsStateUseCase
 import jp.cordea.voiceclock.ObserveCurrentTimeUseCase
-import jp.cordea.voiceclock.TimerServiceProvider
 import jp.cordea.voiceclock.TtsState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import java.util.Date
 import javax.inject.Inject
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClockViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase,
-    timerServiceProvider: TimerServiceProvider,
+    clockServiceProvider: ClockServiceProvider,
     observeCurrentTimeUseCase: ObserveCurrentTimeUseCase
 ) : ViewModel() {
     companion object {
@@ -49,15 +49,15 @@ class ClockViewModel @Inject constructor(
                 time.value = FORMAT.format(it.time)
             }
             .launchIn(viewModelScope)
-        request
-            .consumeAsFlow()
-            .flatMapLatest { start ->
-                timerServiceProvider.get()
-                    .map { start to it }
+        clockServiceProvider.get()
+            .flatMapLatest { service ->
+                request
+                    .receiveAsFlow()
+                    .map { it to service }
             }
             .onEach { (start, service) ->
                 if (start) {
-                    service.startClock(value.value, unit.value)
+                    service.start(value.value, unit.value)
                     state.value = TimerState.STARTED
                 } else {
                     service.stop()

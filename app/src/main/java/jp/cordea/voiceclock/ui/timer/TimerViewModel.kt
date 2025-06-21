@@ -12,7 +12,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -26,7 +25,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class TimerViewModel @Inject constructor(
     getTtsStateUseCase: GetTtsStateUseCase,
-    private val timerServiceProvider: TimerServiceProvider,
+    timerServiceProvider: TimerServiceProvider,
 ) : ViewModel() {
     private val remaining = MutableStateFlow(Duration.ZERO)
     private val sweepAngle = MutableStateFlow(360f)
@@ -46,11 +45,11 @@ class TimerViewModel @Inject constructor(
     private val request = Channel<Duration>()
 
     init {
-        request
-            .consumeAsFlow()
-            .flatMapLatest { start ->
-                timerServiceProvider.get()
-                    .map { start to it }
+        timerServiceProvider.get()
+            .flatMapLatest { service ->
+                request
+                    .receiveAsFlow()
+                    .map { it to service }
             }
             .map { (duration, service) ->
                 val total =
@@ -67,7 +66,7 @@ class TimerViewModel @Inject constructor(
                                 ClockUnit.MINUTE -> 60
                                 ClockUnit.SECOND -> 1
                             }
-                    service.startTimer(duration, timer)
+                    service.start(duration, timer)
                 }
             }
             .flatMapLatest { (_, service, total) ->

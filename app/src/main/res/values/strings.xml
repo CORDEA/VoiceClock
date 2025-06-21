@@ -33,5 +33,9 @@
     <string name="timer_service_channel_id">timer_channel</string>
     <string name="timer_service_notification_title_initial">Waiting to start</string>
 
-    <string name="explanation_for_special_use">To maintain the timer</string>
+    <string name="clock_service_channel_name">Clock</string>
+    <string name="clock_service_channel_id">clock_channel</string>
+    <string name="clock_service_notification_title_initial">Waiting to start</string>
+
+    <string name="explanation_for_special_use">To maintain the timer and clock</string>
 </resources>

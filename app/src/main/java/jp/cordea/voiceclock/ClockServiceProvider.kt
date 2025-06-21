@@ -13,13 +13,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TimerServiceProvider @Inject constructor(
+class ClockServiceProvider @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     fun get() = callbackFlow {
         val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                val binder = service as TimerService.TimerBinder
+                val binder = service as ClockService.ClockBinder
                 trySend(binder.getService())
             }
 
@@ -27,7 +27,7 @@ class TimerServiceProvider @Inject constructor(
                 cancel()
             }
         }
-        Intent(context, TimerService::class.java).also { intent ->
+        Intent(context, ClockService::class.java).also { intent ->
             context.bindService(
                 intent,
                 connection,
