@@ -22,6 +22,8 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.Duration
 import javax.inject.Inject
@@ -35,6 +37,9 @@ class TimerService : Service() {
 
     @Inject
     lateinit var readTextUseCase: ReadTextUseCase
+
+    @Inject
+    lateinit var observeCurrentTimeUseCase: ObserveCurrentTimeUseCase
 
     private val binder = TimerBinder()
     private val serviceJob = SupervisorJob()
@@ -77,24 +82,31 @@ class TimerService : Service() {
             startForegroundService(intent)
         }
         serviceJob.cancelChildren()
-        serviceScope.launch {
-            while (true) {
-                delay(1000L)
-                val calendar = Calendar.getInstance()
+        observeCurrentTimeUseCase.execute()
+            .onEach { calendar ->
                 val now = FORMAT.format(calendar.time)
-                val field = when (unit) {
-                    ClockUnit.HOUR -> Calendar.HOUR_OF_DAY
-                    ClockUnit.MINUTE -> Calendar.MINUTE
-                    ClockUnit.SECOND -> Calendar.SECOND
-                }
-                if (calendar.get(field) == value) {
-                    readTextUseCase.execute(now)
+                when (unit) {
+                    ClockUnit.HOUR ->
+                        if (calendar.get(Calendar.HOUR_OF_DAY) == value) {
+                            if (calendar.get(Calendar.MINUTE) == 0 && calendar.get(Calendar.SECOND) == 0) {
+                                readTextUseCase.execute(now)
+                            }
+                        }
+
+                    ClockUnit.MINUTE ->
+                        if (calendar.get(Calendar.MINUTE) == value && calendar.get(Calendar.SECOND) == 0) {
+                            readTextUseCase.execute(now)
+                        }
+
+                    ClockUnit.SECOND -> if (calendar.get(Calendar.SECOND) == value) {
+                        readTextUseCase.execute(now)
+                    }
                 }
                 getSystemService<NotificationManager>()?.notify(
                     NOTIFICATION_ID, createNotification(now)
                 )
             }
-        }
+            .launchIn(serviceScope)
     }
 
     fun startTimer(duration: Duration, timer: Int) {
