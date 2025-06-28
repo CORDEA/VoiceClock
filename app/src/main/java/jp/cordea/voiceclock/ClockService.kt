@@ -44,7 +44,7 @@ class ClockService : Service() {
         val channel = NotificationChannel(
             getString(R.string.clock_service_channel_id),
             getString(R.string.clock_service_channel_name),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_HIGH
         )
         getSystemService<NotificationManager>()?.createNotificationChannel(channel)
     }

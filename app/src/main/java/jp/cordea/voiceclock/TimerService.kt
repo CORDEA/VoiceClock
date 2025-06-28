@@ -42,7 +42,7 @@ class TimerService : Service() {
         val channel = NotificationChannel(
             getString(R.string.timer_service_channel_id),
             getString(R.string.timer_service_channel_name),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_HIGH
         )
         getSystemService<NotificationManager>()?.createNotificationChannel(channel)
     }
