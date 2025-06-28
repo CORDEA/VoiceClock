@@ -115,6 +115,7 @@ class ClockService : Service() {
             .setContentTitle(contentText)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
+            .setOnlyAlertOnce(true)
             .build()
     }
 

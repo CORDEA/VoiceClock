@@ -110,6 +110,7 @@ class TimerService : Service() {
             .setContentTitle(contentText)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
+            .setOnlyAlertOnce(true)
             .build()
     }
 
