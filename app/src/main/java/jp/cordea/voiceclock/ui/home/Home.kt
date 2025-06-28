@@ -1,7 +1,9 @@
 package jp.cordea.voiceclock.ui.home
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,7 +31,7 @@ import jp.cordea.voiceclock.ui.timer.Timer
 @Composable
 fun Home(viewModel: HomeViewModel) {
     val navController = rememberNavController()
-    val launcher = rememberLauncherForActivityResult(
+    val resultLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         when (it.resultCode) {
@@ -39,17 +41,27 @@ fun Home(viewModel: HomeViewModel) {
         }
     }
     LaunchedEffect(Unit) {
-        launcher.launch(
+        resultLauncher.launch(
             Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA)
         )
     }
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(uiState.isTtsRequired) {
         if (uiState.isTtsRequired) {
-            launcher.launch(
+            resultLauncher.launch(
                 Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
             )
             viewModel.onTtsRequested()
+        }
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        // do nothing
+    }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
     Scaffold(
