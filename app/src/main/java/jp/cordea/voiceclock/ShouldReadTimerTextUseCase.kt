@@ -23,9 +23,12 @@ class ShouldReadTimerTextUseCase @Inject constructor() {
         }
         val timingInHours = timing / 3600L
         if (timingInHours < 1) {
-            return (current.toMinutes() - timingInMinutes) % 60 == 0L
+            return (current.toMinutes() - timingInMinutes) % 60 == 0L &&
+                    seconds % 60 == 0L
         }
         val hours = current.toHours()
-        return (hours - timingInHours) % 24 == 0L
+        return (hours - timingInHours) % 24 == 0L &&
+                current.toMinutes() % 60 == 0L &&
+                seconds % 60 == 0L
     }
 }

@@ -26,6 +26,9 @@ class ShouldReadTimerTextUseCaseTest {
         assertThat(useCase.execute(Duration.ofMinutes(1), 60)).isTrue()
         assertThat(useCase.execute(Duration.ofMinutes(61), 60)).isTrue()
         assertThat(useCase.execute(Duration.ofMinutes(121), 60)).isTrue()
+        assertThat(useCase.execute(Duration.ofSeconds(61), 60)).isFalse()
+        assertThat(useCase.execute(Duration.ofSeconds(110), 60)).isFalse()
+        assertThat(useCase.execute(Duration.ofSeconds(59), 60)).isFalse()
         assertThat(useCase.execute(Duration.ofMinutes(2), 60)).isFalse()
         assertThat(useCase.execute(Duration.ofMinutes(50), 60)).isFalse()
         assertThat(useCase.execute(Duration.ofMinutes(11), 60)).isFalse()
@@ -37,6 +40,8 @@ class ShouldReadTimerTextUseCaseTest {
         assertThat(useCase.execute(Duration.ofMinutes(11), 120)).isFalse()
 
         assertThat(useCase.execute(Duration.ofHours(1), 3600)).isTrue()
+        assertThat(useCase.execute(Duration.ofSeconds(3601), 3600)).isFalse()
+        assertThat(useCase.execute(Duration.ofSeconds(3660), 3600)).isFalse()
         assertThat(useCase.execute(Duration.ofHours(2), 3600)).isFalse()
         assertThat(useCase.execute(Duration.ofHours(3), 3600)).isFalse()
         assertThat(useCase.execute(Duration.ofHours(50), 3600)).isFalse()
