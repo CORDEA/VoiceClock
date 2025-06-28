@@ -1,5 +1,6 @@
 package jp.cordea.voiceclock
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,16 @@ class MainActivity : ComponentActivity() {
             VoiceClockTheme {
                 VoiceClockApp()
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isFinishing) {
+            listOf(
+                Intent(this, TimerService::class.java),
+                Intent(this, ClockService::class.java)
+            ).forEach(::stopService)
         }
     }
 }
