@@ -170,9 +170,9 @@ private fun Controller(
                         onValueExpandChanged(false)
                     }) {
                         val range = when (unit) {
-                            ClockUnit.HOUR -> (0..23)
-                            ClockUnit.MINUTE -> (0..59)
-                            ClockUnit.SECOND -> (0..59)
+                            ClockUnit.HOUR -> (0..24)
+                            ClockUnit.MINUTE -> (0..60)
+                            ClockUnit.SECOND -> (0..60)
                         }
                         range.forEach {
                             DropdownMenuItem(

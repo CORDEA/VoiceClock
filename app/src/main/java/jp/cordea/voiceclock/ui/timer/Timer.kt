@@ -256,7 +256,7 @@ private fun Controller(
                     onExpandedChange = onHoursExpandChanged,
                     modifier = Modifier.weight(1f)
                 ) {
-                    (0..23).forEach {
+                    (0..24).forEach {
                         DropdownMenuItem(
                             onClick = {
                                 onHoursChanged(it)
@@ -277,7 +277,7 @@ private fun Controller(
                     onExpandedChange = onMinutesExpandChanged,
                     modifier = Modifier.weight(1f)
                 ) {
-                    (0..59).forEach {
+                    (0..60).forEach {
                         DropdownMenuItem(
                             onClick = {
                                 onMinutesChanged(it)
@@ -298,7 +298,7 @@ private fun Controller(
                     onExpandedChange = onSecondsExpandChanged,
                     modifier = Modifier.weight(1f)
                 ) {
-                    (0..59).forEach {
+                    (0..60).forEach {
                         DropdownMenuItem(
                             onClick = {
                                 onSecondsChanged(it)
@@ -332,8 +332,8 @@ private fun Controller(
                     modifier = Modifier.weight(1f)
                 ) {
                     val range = when (unit) {
-                        ClockUnit.HOUR -> (1..23)
-                        ClockUnit.MINUTE -> (1..59)
+                        ClockUnit.HOUR -> (1..24)
+                        ClockUnit.MINUTE -> (1..60)
                         ClockUnit.SECOND -> (0..59).step(10).drop(1)
                     }
                     range.forEach {
