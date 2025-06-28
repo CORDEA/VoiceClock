@@ -30,7 +30,7 @@ class TimerViewModel @Inject constructor(
     private val hours = MutableStateFlow(0)
     private val minutes = MutableStateFlow(0)
     private val seconds = MutableStateFlow(0)
-    private val value = MutableStateFlow(1)
+    private val timing = MutableStateFlow(1)
     private val unit = MutableStateFlow(ClockUnit.MINUTE)
     private val state = MutableStateFlow(TimerState.STOPPED)
 
@@ -52,7 +52,7 @@ class TimerViewModel @Inject constructor(
                 if (duration.isZero) {
                     service.stop()
                 } else {
-                    val timer = value.value *
+                    val timer = timing.value *
                             when (unit.value) {
                                 ClockUnit.HOUR -> 3600L
                                 ClockUnit.MINUTE -> 60L
@@ -89,7 +89,7 @@ class TimerViewModel @Inject constructor(
             },
             combine(
                 unit,
-                value,
+                timing,
                 hours,
                 minutes,
                 seconds,
@@ -159,6 +159,9 @@ class TimerViewModel @Inject constructor(
         if (hours.value == 0 && minutes.value == 0 && seconds.value == 0) {
             return
         }
+        if (timing.value == 0) {
+            return
+        }
         showController.value = false
         state.value = TimerState.STARTED
         val duration = Duration.ofSeconds(hours.value * 3600L + minutes.value * 60L + seconds.value)
@@ -184,8 +187,8 @@ class TimerViewModel @Inject constructor(
         isValueExpanded.value = it
     }
 
-    fun onValueChanged(it: Int) {
-        value.value = it
+    fun onTimingChanged(it: Int) {
+        timing.value = it
         isValueExpanded.value = false
     }
 
@@ -195,7 +198,7 @@ class TimerViewModel @Inject constructor(
 
     fun onUnitChanged(it: ClockUnit) {
         unit.value = it
-        value.value = 0
+        timing.value = 0
         isUnitExpanded.value = false
     }
 

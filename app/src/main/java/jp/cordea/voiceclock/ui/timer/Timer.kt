@@ -111,7 +111,7 @@ fun Timer(viewModel: TimerViewModel) {
                     viewModel.onValueExpandChanged(it)
                 },
                 onValueChanged = {
-                    viewModel.onValueChanged(it)
+                    viewModel.onTimingChanged(it)
                 },
                 onUnitExpandChanged = {
                     viewModel.onUnitExpandChanged(it)
@@ -332,9 +332,9 @@ private fun Controller(
                     modifier = Modifier.weight(1f)
                 ) {
                     val range = when (unit) {
-                        ClockUnit.HOUR -> (0..23)
-                        ClockUnit.MINUTE -> (0..59)
-                        ClockUnit.SECOND -> (0..59).step(10)
+                        ClockUnit.HOUR -> (1..23)
+                        ClockUnit.MINUTE -> (1..59)
+                        ClockUnit.SECOND -> (0..59).step(10).drop(1)
                     }
                     range.forEach {
                         DropdownMenuItem(
