@@ -114,7 +114,7 @@ class TimerService : Service() {
         )
         return NotificationCompat.Builder(this, getString(R.string.timer_service_channel_id))
             .setContentTitle(contentText)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .build()
     }
