@@ -9,15 +9,7 @@ import jp.cordea.voiceclock.TtsState
 import jp.cordea.voiceclock.ui.clock.ClockUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import java.time.Duration
 import javax.inject.Inject
 
@@ -62,9 +54,9 @@ class TimerViewModel @Inject constructor(
                 } else {
                     val timer = value.value *
                             when (unit.value) {
-                                ClockUnit.HOUR -> 3600
-                                ClockUnit.MINUTE -> 60
-                                ClockUnit.SECOND -> 1
+                                ClockUnit.HOUR -> 3600L
+                                ClockUnit.MINUTE -> 60L
+                                ClockUnit.SECOND -> 1L
                             }
                     service.start(duration, timer)
                 }

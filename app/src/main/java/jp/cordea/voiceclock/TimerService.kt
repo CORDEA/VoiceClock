@@ -1,10 +1,6 @@
 package jp.cordea.voiceclock
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -12,14 +8,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import dagger.hilt.android.AndroidEntryPoint
 import jp.cordea.voiceclock.ui.timer.formattedString
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.Duration
 import javax.inject.Inject
 
@@ -34,6 +25,9 @@ class TimerService : Service() {
 
     @Inject
     lateinit var observeCurrentTimeUseCase: ObserveCurrentTimeUseCase
+
+    @Inject
+    lateinit var shouldReadTimerTextUseCase: ShouldReadTimerTextUseCase
 
     private val binder = TimerBinder()
     private val serviceJob = SupervisorJob()
@@ -71,7 +65,7 @@ class TimerService : Service() {
         stop()
     }
 
-    fun start(duration: Duration, timer: Int) {
+    fun start(duration: Duration, timing: Long) {
         var next = duration
         Intent(applicationContext, TimerService::class.java).also { intent ->
             startForegroundService(intent)
@@ -89,7 +83,7 @@ class TimerService : Service() {
                     stop()
                     return@launch
                 }
-                if (next.seconds % timer == 0L) {
+                if (shouldReadTimerTextUseCase.execute(next, timing)) {
                     readTextUseCase.execute(next.formattedString())
                 }
                 getSystemService<NotificationManager>()?.notify(

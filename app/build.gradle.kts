@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.play.services.oss.licenses)
     ksp(libs.dagger.hilt.compiler)
     testImplementation(libs.junit)
+    testImplementation(libs.truth)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
